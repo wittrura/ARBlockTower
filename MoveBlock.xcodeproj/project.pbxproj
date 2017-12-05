@@ -57,9 +57,9 @@
 			isa = PBXGroup;
 			children = (
 				1608426E1FD73EF700FB6C78 /* AppDelegate.swift */,
-				160842701FD73EF700FB6C78 /* art.scnassets */,
 				160842721FD73EF700FB6C78 /* ViewController.swift */,
 				160842741FD73EF700FB6C78 /* Main.storyboard */,
+				160842701FD73EF700FB6C78 /* art.scnassets */,
 				160842771FD73EF700FB6C78 /* Assets.xcassets */,
 				160842791FD73EF700FB6C78 /* LaunchScreen.storyboard */,
 				1608427C1FD73EF700FB6C78 /* Info.plist */,
@@ -282,7 +282,7 @@
 				DEVELOPMENT_TEAM = 47GDWEFLEB;
 				INFOPLIST_FILE = MoveBlock/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryanwittrup.MoveBlock;
+				PRODUCT_BUNDLE_IDENTIFIER = "Ryan-Wittrup.FirstApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -297,7 +297,7 @@
 				DEVELOPMENT_TEAM = 47GDWEFLEB;
 				INFOPLIST_FILE = MoveBlock/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ryanwittrup.MoveBlock;
+				PRODUCT_BUNDLE_IDENTIFIER = "Ryan-Wittrup.FirstApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
