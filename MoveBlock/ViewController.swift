@@ -34,6 +34,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoenablesDefaultLighting = true
         
         
+        
         addBlockToScene(name: "block1", position: SCNVector3(x: 0, y: 0.1, z: -0.5)) // -z axis is AWAY from user
         addBlockToScene(name: "block2", position: SCNVector3(x: 0, y: -0.1, z: -0.5)) // -z axis is AWAY from user
         addBlockToScene(name: "block3", position: SCNVector3(x: 0.1, y: 0.1, z: -0.5)) // -z axis is AWAY from user
@@ -79,7 +80,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return node
     }
 */
-    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         // try to downcast planeAnchor to ARPlaneAnchor
         guard let planeAnchor = anchor as? ARPlaneAnchor else {return}
@@ -87,11 +87,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let planeNode = createPlane(withPlaneAnchor: planeAnchor)
         
         node.addChildNode(planeNode)
-        
-        //DELETE
-        addBlockToScene(name: "onPlaneCreate", position: SCNVector3Make(node.worldPosition.x, node.worldPosition.y + 1.0, node.worldPosition.z))
-        //DELETE
-        
     }
     
 //    TODO - expand existing plane
@@ -123,6 +118,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let touchLocation = sender.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(touchLocation)
         
+        
+        //TODO - delete - creates block at tap for testing purposes
+        let hitTestResultsPlane = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
+        if let hitTestResultPlane = hitTestResultsPlane.first {
+            addBlockToScene(name: "tapToCreateBlock", position: SCNVector3Make(hitTestResultPlane.worldTransform.columns.3.x, hitTestResultPlane.worldTransform.columns.3.y + 0.50, hitTestResultPlane.worldTransform.columns.3.z))
+        }
+        //TODO - delete
+        
+        
         if let hitTestResult = hitTestResults.first {
             
             // only select objects with 'block' in their name
@@ -138,6 +142,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             print(selectedBlock)
         }
+        
     }
     
     
@@ -187,7 +192,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - Setter Methods for Long Lived Variables
     func setSelectedBlock(hitTestResultNode newSelectedBlock: SCNNode) -> Void {
-       
+        
+        // deactive selected block if it matches the hitTestResult
+        // aka a person clicked the block which was already selected
+        if newSelectedBlock == selectedBlock {
+            // set previously active block back to blue
+            let unselectedMaterial = SCNMaterial()
+            unselectedMaterial.diffuse.contents = UIColor.blue
+            selectedBlock?.geometry?.materials = [unselectedMaterial]
+            selectedBlock = nil
+            return
+        }
+        
         // set previously active block back to blue
         let unselectedMaterial = SCNMaterial()
         unselectedMaterial.diffuse.contents = UIColor.blue
@@ -202,6 +218,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         selectedBlock = newSelectedBlock
     }
     
+//    TODO
+//    func deselectBlock(block: SCNNode) -> Void {
+//        // add unselected materials
+//        // set selectedBlock to nil
+//    }
+    
     
     //MARK: - Block Rendering Methods
     func addBlockToScene(name: String, position: SCNVector3) -> Void {
@@ -215,6 +237,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         node.position = position
         node.geometry = cube
         node.name = name
+        
+        
+        // add physics to block
+//        node.physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.dynamic, shape: nil)
+//        node.physicsBody?.mass = 0.5
+        
         
         blocks.append(node)
         sceneView.scene.rootNode.addChildNode(node)
@@ -244,8 +272,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         let planeNode = SCNNode()
         planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+        
         // transfrom from standard x, y to x, z
         planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+        
         
         let gridMaterial = SCNMaterial()
         gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
