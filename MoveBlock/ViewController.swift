@@ -46,9 +46,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-  
-    
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -90,35 +87,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let planeNode = createPlane(withPlaneAnchor: planeAnchor)
         
         node.addChildNode(planeNode)
+        
+        //DELETE
+        addBlockToScene(name: "onPlaneCreate", position: SCNVector3Make(node.worldPosition.x, node.worldPosition.y + 1.0, node.worldPosition.z))
+        //DELETE
+        
     }
     
 //    TODO - expand existing plane
 //    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
 //        <#code#>
 //    }
-    
-    
-    //MARK: - Plane Rendering Methods
-    func createPlane(withPlaneAnchor planeAnchor: ARPlaneAnchor) -> SCNNode {
-        // planes are always defined by x and z dimenions for horizontal plane detection, y is AWLAYS ZERO
-        // define new plan based on added anchor
-        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
-        
-        let planeNode = SCNNode()
-        planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
-        // transfrom from standard x, y to x, z
-        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
-        
-        let gridMaterial = SCNMaterial()
-        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
-        
-        plane.materials = [gridMaterial]
-        
-        planeNode.geometry = plane
-        
-        return planeNode
-    }
-    
     
     
     func session(_ session: ARSession, didFailWithError error: Error) {
@@ -145,7 +124,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let hitTestResults = sceneView.hitTest(touchLocation)
         
         if let hitTestResult = hitTestResults.first {
-            print(hitTestResult.node.name)
+            
+            // only select objects with 'block' in their name
+            // guard against accidentally activating featurePoints and planes
+            guard let name = hitTestResult.node.name?.contains("block") else {
+                return
+            }
+            
+            print(name)
+            print(hitTestResult.node.name!)
             
             setSelectedBlock(hitTestResultNode: hitTestResult.node)
             
@@ -198,20 +185,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    //MARK: - Block Movement Methods
-    func translateX(node: SCNNode, distance: CGFloat) -> Void {
-        node.position.x = node.position.x + Float(distance)
-    }
-    
-    func translateY(node: SCNNode, distance: CGFloat) -> Void {
-        node.position.y = node.position.y + Float(distance)
-    }
-    
-    func translateZ(node: SCNNode, distance: CGFloat) -> Void {
-        node.position.z = node.position.z + Float(distance)
-    }
-    
-    
     //MARK: - Setter Methods for Long Lived Variables
     func setSelectedBlock(hitTestResultNode newSelectedBlock: SCNNode) -> Void {
        
@@ -230,16 +203,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    //MARK: - Helper Methods
-    func getNodeByName(name: String) -> SCNNode? {
-        for block in blocks {
-            if block.name == name {
-                return block
-            }
-        }
-        return nil
-    }
-    
+    //MARK: - Block Rendering Methods
     func addBlockToScene(name: String, position: SCNVector3) -> Void {
         let cube = SCNBox(width: 0.05, height: 0.05, length: 0.15, chamferRadius: 0.01)
         let material = SCNMaterial()
@@ -254,5 +218,58 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         blocks.append(node)
         sceneView.scene.rootNode.addChildNode(node)
+        print("created block \(name)")
+    }
+    
+
+    //MARK: - Block Movement Methods
+    func translateX(node: SCNNode, distance: CGFloat) -> Void {
+        node.position.x = node.position.x + Float(distance)
+    }
+    
+    func translateY(node: SCNNode, distance: CGFloat) -> Void {
+        node.position.y = node.position.y + Float(distance)
+    }
+    
+    func translateZ(node: SCNNode, distance: CGFloat) -> Void {
+        node.position.z = node.position.z + Float(distance)
+    }
+    
+    
+    //MARK: - Plane Rendering Methods
+    func createPlane(withPlaneAnchor planeAnchor: ARPlaneAnchor) -> SCNNode {
+        // planes are always defined by x and z dimenions for horizontal plane detection, y is AWLAYS ZERO
+        // define new plan based on added anchor
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        
+        let planeNode = SCNNode()
+        planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+        // transfrom from standard x, y to x, z
+        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+        
+        let gridMaterial = SCNMaterial()
+        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+        
+        plane.materials = [gridMaterial]
+        
+        planeNode.geometry = plane
+        
+        // add as physics body, kinematic type to be stationary but still cause collisions with other bodies
+        planeNode.physicsBody = SCNPhysicsBody(
+            type: SCNPhysicsBodyType.kinematic,
+            shape: SCNPhysicsShape(geometry: planeNode.geometry!, options: nil))
+        
+        return planeNode
+    }
+    
+    
+    //MARK: - Helper Methods
+    func getNodeByName(name: String) -> SCNNode? {
+        for block in blocks {
+            if block.name == name {
+                return block
+            }
+        }
+        return nil
     }
 }
