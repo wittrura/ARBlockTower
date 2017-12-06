@@ -18,6 +18,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var blocks = [SCNNode] ()
     var selectedBlock: SCNNode?
     
+    struct CollisionTypes : OptionSet {
+        let rawValue: Int
+        
+        static let bottom  = CollisionTypes(rawValue: 1 << 0)
+        static let shape = CollisionTypes(rawValue: 1 << 1)
+    }
+    
     
     //MARK: - Lifecycle Methods
     override func viewDidLoad() {
@@ -227,6 +234,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     //MARK: - Block Rendering Methods
     func addBlockToScene(name: String, position: SCNVector3) -> Void {
+        //
         let cube = SCNBox(width: 0.05, height: 0.05, length: 0.15, chamferRadius: 0.01)
         let material = SCNMaterial()
         material.diffuse.contents = UIColor.blue
@@ -238,11 +246,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         node.geometry = cube
         node.name = name
         
-        
         // add physics to block
-//        node.physicsBody = SCNPhysicsBody(type: SCNPhysicsBodyType.dynamic, shape: nil)
-//        node.physicsBody?.mass = 0.5
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: node.geometry!, options: nil))
+        physicsBody.mass = 0.5
+        physicsBody.restitution = 0.25
+        physicsBody.friction = 0.75
+        physicsBody.categoryBitMask = CollisionTypes.shape.rawValue
         
+        node.physicsBody = physicsBody
+        
+//        node.physicsBody?.isAffectedByGravity = false
         
         blocks.append(node)
         sceneView.scene.rootNode.addChildNode(node)
@@ -265,21 +278,51 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     
     //MARK: - Plane Rendering Methods
+//    func createPlane(withPlaneAnchor planeAnchor: ARPlaneAnchor) -> SCNNode {
+//        // planes are always defined by x and z dimenions for horizontal plane detection, y is AWLAYS ZERO
+//        // define new plan based on added anchor
+//        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+//
+//        let planeNode = SCNNode()
+//        planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+//
+//        // transfrom from standard x, y to x, z
+//        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+//
+//
+//        let gridMaterial = SCNMaterial()
+////        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+//        gridMaterial.diffuse.contents = UIColor(red: 0, green: 0, blue: 1, alpha: 0.5)
+//
+//        plane.materials = [gridMaterial]
+//
+//        planeNode.geometry = plane
+//
+//        // add as physics body, kinematic type to be stationary but still cause collisions with other bodies
+//        planeNode.physicsBody = SCNPhysicsBody(
+//            type: SCNPhysicsBodyType.kinematic,
+//            shape: SCNPhysicsShape(geometry: planeNode.geometry!, options: nil))
+//
+//        return planeNode
+//    }
+    
+    // create plane based on box
     func createPlane(withPlaneAnchor planeAnchor: ARPlaneAnchor) -> SCNNode {
         // planes are always defined by x and z dimenions for horizontal plane detection, y is AWLAYS ZERO
         // define new plan based on added anchor
-        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        let plane = SCNBox(width: CGFloat(planeAnchor.extent.x), height: 0.05, length: CGFloat(planeAnchor.extent.z), chamferRadius: 0)
+        
         
         let planeNode = SCNNode()
-        planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+        planeNode.position = SCNVector3(0, -plane.height / 2, 0)
         
         // transfrom from standard x, y to x, z
-        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+//        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
         
         
         let gridMaterial = SCNMaterial()
-        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
-        
+        //        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+        gridMaterial.diffuse.contents = UIColor(red: 0, green: 0, blue: 1, alpha: 0.5)
         plane.materials = [gridMaterial]
         
         planeNode.geometry = plane
