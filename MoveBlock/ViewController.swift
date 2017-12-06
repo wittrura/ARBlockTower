@@ -46,21 +46,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    //MARK: - Gesture Methods
-    @objc func tap(sender: UITapGestureRecognizer) -> Void {
-        print("tapped")
-        
-        let touchLocation = sender.location(in: sceneView)
-        let hitTestResults = sceneView.hitTest(touchLocation)
-        
-        if let hitTestResult = hitTestResults.first {
-            print(hitTestResult.node.name)
-            
-            setSelectedBlock(hitTestResultNode: hitTestResult.node)
-            
-            print(selectedBlock)
-        }
-    }
+  
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -97,6 +83,44 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 */
     
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        // try to downcast planeAnchor to ARPlaneAnchor
+        guard let planeAnchor = anchor as? ARPlaneAnchor else {return}
+        
+        let planeNode = createPlane(withPlaneAnchor: planeAnchor)
+        
+        node.addChildNode(planeNode)
+    }
+    
+//    TODO - expand existing plane
+//    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+//        <#code#>
+//    }
+    
+    
+    //MARK: - Plane Rendering Methods
+    func createPlane(withPlaneAnchor planeAnchor: ARPlaneAnchor) -> SCNNode {
+        // planes are always defined by x and z dimenions for horizontal plane detection, y is AWLAYS ZERO
+        // define new plan based on added anchor
+        let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
+        
+        let planeNode = SCNNode()
+        planeNode.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
+        // transfrom from standard x, y to x, z
+        planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
+        
+        let gridMaterial = SCNMaterial()
+        gridMaterial.diffuse.contents = UIImage(named: "art.scnassets/grid.png")
+        
+        plane.materials = [gridMaterial]
+        
+        planeNode.geometry = plane
+        
+        return planeNode
+    }
+    
+    
+    
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
         
@@ -110,6 +134,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+    
+    
+    //MARK: - Gesture Methods
+    @objc func tap(sender: UITapGestureRecognizer) -> Void {
+        print("tapped")
+        
+        let touchLocation = sender.location(in: sceneView)
+        let hitTestResults = sceneView.hitTest(touchLocation)
+        
+        if let hitTestResult = hitTestResults.first {
+            print(hitTestResult.node.name)
+            
+            setSelectedBlock(hitTestResultNode: hitTestResult.node)
+            
+            print(selectedBlock)
+        }
     }
     
     
@@ -156,6 +197,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         translateZ(node: selectedBlock!, distance: -0.05)
     }
     
+    
     //MARK: - Block Movement Methods
     func translateX(node: SCNNode, distance: CGFloat) -> Void {
         node.position.x = node.position.x + Float(distance)
@@ -170,7 +212,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     
-    //MARK: -
+    //MARK: - Setter Methods for Long Lived Variables
     func setSelectedBlock(hitTestResultNode newSelectedBlock: SCNNode) -> Void {
        
         // set previously active block back to blue
