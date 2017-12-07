@@ -41,11 +41,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.autoenablesDefaultLighting = true
         
         
-        
-        addBlockToScene(name: "block1", position: SCNVector3(x: 0, y: 0.1, z: -0.5)) // -z axis is AWAY from user
-        addBlockToScene(name: "block2", position: SCNVector3(x: 0, y: -0.1, z: -0.5)) // -z axis is AWAY from user
-        addBlockToScene(name: "block3", position: SCNVector3(x: 0.1, y: 0.1, z: -0.5)) // -z axis is AWAY from user
-        
+//        addBlockToScene(name: "block1", position: SCNVector3(x: 0, y: 0.1, z: -0.5)) // -z axis is AWAY from user
+//        addBlockToScene(name: "block2", position: SCNVector3(x: 0, y: -0.1, z: -0.5)) // -z axis is AWAY from user
+//        addBlockToScene(name: "block3", position: SCNVector3(x: 0.1, y: 0.1, z: -0.5)) // -z axis is AWAY from user
         
         
         // gesture recognizers to handle user inputs
@@ -130,18 +128,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let touchLocation = sender.location(in: sceneView)
         let hitTestResults = sceneView.hitTest(touchLocation)
         
-        
-        //TODO - delete - creates block at tap for testing purposes
+        //TODO - delete and create build tower button
         let hitTestResultsPlane = sceneView.hitTest(touchLocation, types: .existingPlaneUsingExtent)
         if let hitTestResultPlane = hitTestResultsPlane.first {
-//            addBlockToScene(name: "tapToCreateBlock", position: SCNVector3Make(hitTestResultPlane.worldTransform.columns.3.x, hitTestResultPlane.worldTransform.columns.3.y + 0.50, hitTestResultPlane.worldTransform.columns.3.z))
+            
+            // use tap location as base for building tower
             let position = SCNVector3Make(
                 hitTestResultPlane.worldTransform.columns.3.x,
-                hitTestResultPlane.worldTransform.columns.3.y + 0.001,
+                hitTestResultPlane.worldTransform.columns.3.y, // block appears to be slightly higer than plane
                 hitTestResultPlane.worldTransform.columns.3.z)
             addBlocksToScene(initialPosition: position, numRows: 10)
         }
-        //TODO - delete
+        //TODO - delete and create build tower button
         
         
         if let hitTestResult = hitTestResults.first {
@@ -166,7 +164,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateX(node: selectedBlock!, distance: 0.05)
         applyForceX(node: selectedBlock!, magnitude: 0.25)
     }
     
@@ -174,7 +171,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateX(node: selectedBlock!, distance: -0.05)
         applyForceX(node: selectedBlock!, magnitude: -0.25)
     }
     
@@ -182,7 +178,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateY(node: selectedBlock!, distance: 0.05)
         applyForceY(node: selectedBlock!, magnitude: 0.25)
     }
     
@@ -190,7 +185,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateY(node: selectedBlock!, distance: -0.05)
         applyForceY(node: selectedBlock!, magnitude: -0.25)
     }
     
@@ -198,7 +192,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateZ(node: selectedBlock!, distance: 0.05)
         applyForceZ(node: selectedBlock!, magnitude: 0.25)
     }
     
@@ -206,7 +199,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard selectedBlock != nil else {
             return
         }
-//        translateZ(node: selectedBlock!, distance: -0.05)
         applyForceZ(node: selectedBlock!, magnitude: -0.25)
     }
     
@@ -215,6 +207,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         rotateBlockClockwise(node: selectedBlock!)
+    }
+    
+    @IBAction func clearBlocks(_ sender: UIButton) {
+        deleteNodes(fromArr: blocks)
+    }
+    
+    @IBAction func addPhysicsToBlocks(_ sender: UIButton) {
+        addPhysicsToTower()
     }
     
     
@@ -246,11 +246,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         blocks.append(node)
         sceneView.scene.rootNode.addChildNode(node)
-        print("created block \(name)")
+//        print("created block \(name)")
     }
     
     
-    // for constructing tower
+    // for constructing tower, adds block with physics and variable length / width
     func addBlockToScene(name: String, position: SCNVector3, length: CGFloat, width: CGFloat) -> Void {
         // set up geometry size and color
         let cube = SCNBox(width: width, height: 0.02, length: length, chamferRadius: 0.001)
@@ -266,20 +266,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         node.name = name
         
         // add physics to block
-//        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: node.geometry!, options: nil))
-//        physicsBody.mass = 0.5  // weight in kg
-//        physicsBody.restitution = 0.25 // bounciness
-//        physicsBody.friction = 0.50 // default value, 0 = easy movement, 1.0 = no movement
-//        physicsBody.categoryBitMask = CollisionTypes.shape.rawValue
-//        node.physicsBody = physicsBody
-//
-//
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: node.geometry!, options: nil))
+        physicsBody.mass = 0.5  // weight in kg
+        physicsBody.restitution = 0.0 // bounciness
+        physicsBody.friction = 1.0 // default value, 0 = easy movement, 1.0 = no movement
+        physicsBody.categoryBitMask = CollisionTypes.shape.rawValue
+        node.physicsBody = physicsBody
+
 //        node.physicsBody?.isAffectedByGravity = false
-        
         
         blocks.append(node)
         sceneView.scene.rootNode.addChildNode(node)
-        print("created block \(name)")
+//        print("created block \(name)")
     }
     
     
@@ -291,41 +289,46 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var buildTowerInX = true
     
     func addBlocksToScene(initialPosition position: SCNVector3, numRows: Int) -> Void {
+        print("tap position: ", position)
+//        if blocks.count > 0 {
+//            print("blocks already present")
+//            return
+//        }
         buildTowerCurrentRowBaseVector = SCNVector3Make(position.x, position.y, position.z)
         
         for i in 1...numRows {
             var currentRowReferenceVector = SCNVector3Make(
                 buildTowerCurrentRowBaseVector.x,
-                buildTowerCurrentRowBaseVector.y,
+                buildTowerCurrentRowBaseVector.y + Float(blockHeight / 2),
                 buildTowerCurrentRowBaseVector.z)
             
-            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
+//            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
             addBlockToScene(name: "block_\(i).1", position: currentRowReferenceVector, length: blockLength, width: blockWidth)
             if buildTowerInX {
-                currentRowReferenceVector.x += Float(blockWidth + 0.0005)
+                currentRowReferenceVector.x += Float(blockWidth)
             } else {
-                currentRowReferenceVector.z += Float(blockLength + 0.0005)
+                currentRowReferenceVector.z += Float(blockLength)
             }
             
-            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
+//            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
             addBlockToScene(name: "block_\(i).2", position: currentRowReferenceVector, length: blockLength, width: blockWidth)
             if buildTowerInX {
-                currentRowReferenceVector.x += Float(blockWidth + 0.0005)
+                currentRowReferenceVector.x += Float(blockWidth)
             } else {
-                currentRowReferenceVector.z += Float(blockLength + 0.0005)
+                currentRowReferenceVector.z += Float(blockLength)
             }
             
-            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
+//            print("insert block at: ", currentRowReferenceVector.x, currentRowReferenceVector.y, currentRowReferenceVector.z)
             addBlockToScene(name: "block_\(i).3", position: currentRowReferenceVector, length: blockLength, width: blockWidth)
             if buildTowerInX {
                 // position, x + width, z - width, y + height
                 buildTowerCurrentRowBaseVector.x += Float(blockWidth)
-                buildTowerCurrentRowBaseVector.y += Float(blockHeight + 0.0005)
+                buildTowerCurrentRowBaseVector.y += Float(blockHeight)
                 buildTowerCurrentRowBaseVector.z -= Float(blockWidth)
             } else {
                 // position, x - width, z + width, y + height
                 buildTowerCurrentRowBaseVector.x -= Float(blockLength)
-                buildTowerCurrentRowBaseVector.y += Float(blockHeight + 0.0005)
+                buildTowerCurrentRowBaseVector.y += Float(blockHeight)
                 buildTowerCurrentRowBaseVector.z += Float(blockLength)
             }
             
@@ -335,10 +338,39 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             blockLength = _blockWidth
 
             buildTowerInX = !buildTowerInX
+            
+        }
+        
+//        addPhysicsToTower()
+        
+        // TO DELETE
+        buildTowerCurrentRowBaseVector = SCNVector3()
+        blockWidth = CGFloat(0.02)
+        blockHeight = CGFloat(0.02)
+        blockLength = CGFloat(0.06)
+        buildTowerInX = true
+        // TO DELETE
+    }
+    
+    
+    func addPhysicsToTower() -> Void {
+        for block in blocks {
+            applyPhysics(to: block)
         }
     }
     
-
+    
+    func applyPhysics(to node: SCNNode) -> Void {
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: node.geometry!, options: nil))
+        physicsBody.mass = 0.01  // weight in kg
+        physicsBody.restitution = 0.05 // bounciness
+        physicsBody.friction = 1.0 // default value, 0 = easy movement, 1.0 = no movement
+        physicsBody.categoryBitMask = CollisionTypes.shape.rawValue
+        node.physicsBody = physicsBody
+        node.physicsBody?.isAffectedByGravity = true
+    }
+    
+    
     //MARK: - Block Movement Methods
     func translateX(node: SCNNode, distance: CGFloat) -> Void {
         node.position.x = node.position.x + Float(distance)
@@ -369,9 +401,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let action = SCNAction.rotateBy(x: 0, y: CGFloat(Float.pi / 2), z: 0, duration: 0.01)
         node.runAction(action)
     }
-    
-    
-    
     
     
     //MARK: - Plane Rendering Methods
@@ -408,11 +437,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // define new plane BOX based on added anchor, using x and z dimensions from the detected anchor
         // SCNBox allows for better collision with blocks
-        let plane = SCNBox(width: CGFloat(planeAnchor.extent.x), height: 0.05, length: CGFloat(planeAnchor.extent.z), chamferRadius: 0)
+        let plane = SCNBox(width: CGFloat(planeAnchor.extent.x), height: 0.01, length: CGFloat(planeAnchor.extent.z), chamferRadius: 0)
         
         // create plane node slightly below y = 0 to account for height
         let planeNode = SCNNode()
-        planeNode.position = SCNVector3(0, -plane.height / 2, 0)
+        planeNode.position = SCNVector3(0, -(plane.height / 2), 0)
         
         // shade light blue
         let gridMaterial = SCNMaterial()
@@ -425,6 +454,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         planeNode.physicsBody = SCNPhysicsBody(
             type: SCNPhysicsBodyType.kinematic,
             shape: SCNPhysicsShape(geometry: planeNode.geometry!, options: nil))
+        
+        
+        planeNode.physicsBody?.friction = 1.0
+        planeNode.physicsBody?.restitution = 0.0
+        
         
         return planeNode
     }
@@ -464,6 +498,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         selectedBlock = nil
     }
     
+    // removes nodes from parent, for blocks this is to remove from sceneview's root node
+    func deleteNodes(fromArr arr: [SCNNode]) -> Void {
+        for node in arr {
+            node.removeFromParentNode()
+        }
+        clearBlocksArr()
+    }
+    
+    // hard delete to empty the blocks array which stores created nodes
+    func clearBlocksArr() -> Void {
+        blocks = [SCNNode]()
+    }
     
     //MARK: - Helper Methods
     func getNodeByName(name: String) -> SCNNode? {

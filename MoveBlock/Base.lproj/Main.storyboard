@@ -81,8 +81,26 @@
                                     <action selector="moveNegstiveZ:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Av3-oW-2Ia"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DxZ-PN-UxP">
+                                <rect key="frame" x="255" y="20" width="143" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
+                                <state key="normal" title="Clear Blocks"/>
+                                <connections>
+                                    <action selector="clearBlocks:" destination="BV1-FR-VrT" eventType="touchUpInside" id="dpB-gU-eFy"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KDj-JJ-oKO">
+                                <rect key="frame" x="20" y="17" width="112" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
+                                <state key="normal" title="Add Physics"/>
+                                <connections>
+                                    <action selector="addPhysicsToBlocks:" destination="BV1-FR-VrT" eventType="touchUpInside" id="6OY-Ed-2gB"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c6U-Bf-8o8">
-                                <rect key="frame" x="237" y="482" width="157" height="36"/>
+                                <rect key="frame" x="237" y="507" width="157" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
                                 <state key="normal" title="Rotate Clockwise"/>
