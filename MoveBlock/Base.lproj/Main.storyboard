@@ -78,7 +78,7 @@
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="20"/>
                                 <state key="normal" title="NegativeZ"/>
                                 <connections>
-                                    <action selector="moveNegstiveZ:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Av3-oW-2Ia"/>
+                                    <action selector="moveNegativeZ:" destination="BV1-FR-VrT" eventType="touchUpInside" id="Gkc-CE-54m"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DxZ-PN-UxP">
