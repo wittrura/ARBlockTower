@@ -266,7 +266,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let cube = SCNBox(width: width, height: 0.02, length: length, chamferRadius: 0.001)
         
         let material = SCNMaterial()
-        material.diffuse.contents = UIColor.blue
+        material.diffuse.contents = randomWoodTexture()
         cube.materials = [material]
         
         // create a point in 3D space, assign position, assign an object to display aka geometry
@@ -292,8 +292,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        print("created block \(name)")
     }
     
+    // randomly select one of the three wood textures to be applied to diffuse contents
+    func randomWoodTexture() -> UIImage {
+        let randomNum = arc4random_uniform(3) + 1
+        
+        var wood = UIImage(named: "art.scnassets/wood1.png")
+        
+        if randomNum > 2 {
+            wood = UIImage(named: "art.scnassets/wood1.png")
+        } else if randomNum < 1 {
+            wood = UIImage(named: "art.scnassets/wood2.png")
+        } else {
+            wood = UIImage(named: "art.scnassets/wood3.jpg")
+        }
+        
+        return wood!
+    }
     
-    //MARK: - Tower Building Properties
+    
+    //MARK: - Tower Building Methods
     var buildTowerCurrentRowBaseVector = SCNVector3()
     var blockWidth = CGFloat(0.02)
     var blockHeight = CGFloat(0.02)
@@ -354,13 +371,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
 //        addPhysicsToTower()
         
-        // TO DELETE
+        // TODO - DELETE
         buildTowerCurrentRowBaseVector = SCNVector3()
         blockWidth = CGFloat(0.02)
         blockHeight = CGFloat(0.02)
         blockLength = CGFloat(0.06)
         buildTowerInX = true
-        // TO DELETE
+        // TODO - DELETE
     }
     
     
@@ -484,7 +501,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // replace material on node to be activated to be red
         let selectedMaterial = SCNMaterial()
-        selectedMaterial.diffuse.contents = UIColor.red
+        selectedMaterial.diffuse.contents = UIImage(named: "art.scnassets/redWood1.jpg")
         
         newSelectedBlock.geometry?.materials = [selectedMaterial]
         
@@ -495,14 +512,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         selectedBlock = newSelectedBlock
     }
     
-    // set previously active block back to blue
+    // set previously active block back to wood texture
     func deselectBlock() -> Void {
         guard selectedBlock != nil else {
             return
         }
         
         let unselectedMaterial = SCNMaterial()
-        unselectedMaterial.diffuse.contents = UIColor.blue
+        unselectedMaterial.diffuse.contents = randomWoodTexture()
+        
         selectedBlock!.geometry?.materials = [unselectedMaterial]
         
         // reactivate gravity, to allow movement vertically
